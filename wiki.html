@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Wiki 知識庫：Prompt Engineering 提示詞工程</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #eef2ff;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --green: #059669;
+      --green-bg: #ecfdf5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+    }
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0.9rem 1.5rem;
+    }
+    .nav-wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .brand {
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .btn-slides {
+      background: var(--primary);
+      color: #fff;
+      text-decoration: none;
+      padding: 0.5rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      transition: opacity 0.2s;
+    }
+    .btn-slides:hover { opacity: 0.9; }
+    .layout {
+      max-width: 1120px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 820px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    aside {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      height: fit-content;
+      position: sticky;
+      top: 76px;
+    }
+    aside h3 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    aside ul { list-style: none; }
+    aside li { margin-bottom: 0.5rem; }
+    aside a {
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.92rem;
+      display: block;
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+    }
+    aside a:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    main { display: flex; flex-direction: column; gap: 1.5rem; }
+    .hero-box {
+      background: linear-gradient(135deg, #312e81, #4f46e5);
+      color: #fff;
+      padding: 2rem;
+      border-radius: 14px;
+    }
+    .hero-box h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .hero-box p { color: #e0e7ff; font-size: 0.98rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+    }
+    .card h2 {
+      font-size: 1.3rem;
+      color: #1e1b4b;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.78rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+    .discuss-log {
+      background: var(--green-bg);
+      border-left: 4px solid var(--green);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.94rem;
+    }
+    .discuss-log ul { padding-left: 1.25rem; margin-top: 0.5rem; }
+    .wiki-entry h3 {
+      font-size: 1.15rem;
+      color: var(--primary);
+      margin-bottom: 0.4rem;
+    }
+    .meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.85rem;
+    }
+    .wiki-entry ul { padding-left: 1.35rem; margin-bottom: 0.75rem; }
+    .wiki-link {
+      display: inline-block;
+      background: #f1f5f9;
+      color: #334155;
+      font-family: monospace;
+      font-size: 0.82rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-right: 0.35rem;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding: 2rem 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <a href="wiki.html" class="brand">🧠 LLM Wiki｜Prompt Engineering 知識庫</a>
+      <a href="index.html" class="btn-slides">🎬 開啟教學 HTML 簡報 →</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <h3>Wiki 目錄導覽</h3>
+      <ul>
+        <li><a href="#discuss">💬 先討論、後生成紀錄</a></li>
+        <li><a href="#s01">§01 LLM Token 預測原理</a></li>
+        <li><a href="#s02">§02 Zero-Shot 與 Few-Shot</a></li>
+        <li><a href="#s03">§03 Chain-of-Thought 思維鏈</a></li>
+        <li><a href="#s04">§04 角色設定與黃金四要素</a></li>
+        <li><a href="#s05">§05 幻覺抑制與防呆設計</a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <section class="hero-box">
+        <h1>Prompt Engineering（提示詞工程）LLM Wiki</h1>
+        <p>本知識庫採用「先討論、後生成（Discuss First, Generate Later）」工作流建置，共計 Ingest 5 篇核心技術文獻，並作為教學型 HTML 簡報之唯一事實來源（Single Source of Truth）。</p>
+      </section>
+
+      <section id="discuss" class="card">
+        <h2>💬 階段一：先討論、後生成（架構共識紀錄）</h2>
+        <div class="discuss-log">
+          <strong>在正式 Ingest 資料前，與 AI 討論確立的 Wiki 建置規格：</strong>
+          <ul>
+            <li><strong>目標受眾定位</strong>：針對完全沒接觸過 Prompt Engineering 的初學者，所有專業英文術語（如 Token、Few-Shot、CoT）都必須附上白話生活比喻。</li>
+            <li><strong>知識架構劃分</strong>：分為「底層原理（§01）→ 基礎與進階技巧（§02、§03）→ 結構化控制（§04）→ 可靠性防呆（§05）」五大模組。</li>
+            <li><strong>雙向連結規範</strong>：每篇 Wiki 條目均保留原始來源檔案於 <code>wiki_sources/</code>，並建立條目間的 <code>[[WikiLink]]</code> 關聯索引。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="s01" class="card wiki-entry">
+        <div class="meta"><span class="badge">Wiki §01</span> 原始檔案：<code>wiki_sources/01-llm-token-prediction.md</code></div>
+        <h3>大型語言模型（LLM）的運作原理與 Token 預測</h3>
+        <ul>
+          <li><strong>文字接龍本質</strong>：LLM 根據前面輸入的所有文字（Context），計算下一個最可能出現的字詞（Token）機率，而非具備人類讀心術。</li>
+          <li><strong>模糊輸入＝平庸輸出</strong>：問題越籠統，模型只能給出訓練資料中最常見的「平均廢話」；條件越具體，輸出越精準。</li>
+        </ul>
+        <div>關聯條目：<span class="wiki-link">[[02-zero-shot-few-shot]]</span><span class="wiki-link">[[04-structured-output-roles]]</span></div>
+      </section>
+
+      <section id="s02" class="card wiki-entry">
+        <div class="meta"><span class="badge">Wiki §02</span> 原始檔案：<code>wiki_sources/02-zero-shot-few-shot.md</code></div>
+        <h3>Zero-Shot（零樣本）與 Few-Shot（少樣本）提示技術</h3>
+        <ul>
+          <li><strong>Zero-Shot（零樣本）</strong>：不給任何範例直接下指令，適合簡單分類或翻譯任務。</li>
+          <li><strong>Few-Shot（少樣本）</strong>：先提供 2～3 組「輸入 → 期望輸出」範例，讓 AI 透過語境學習（In-Context Learning）精準模仿格式與標準，準確率可提升 20%～40%。</li>
+        </ul>
+        <div>關聯條目：<span class="wiki-link">[[01-llm-token-prediction]]</span><span class="wiki-link">[[03-chain-of-thought]]</span></div>
+      </section>
+
+      <section id="s03" class="card wiki-entry">
+        <div class="meta"><span class="badge">Wiki §03</span> 原始檔案：<code>wiki_sources/03-chain-of-thought.md</code></div>
+        <h3>Chain-of-Thought（CoT，思維鏈）推理激發</h3>
+        <ul>
+          <li><strong>給予草稿紙空間</strong>：直接要求 AI 給最終答案容易算錯；加入「請一步一步思考（Let's think step by step）」能強迫模型先列出推理步驟。</li>
+          <li><strong>自我上下文增強</strong>：寫出的推理過程會成為後續字詞預測的依據，大幅降低邏輯跳躍錯誤。</li>
+        </ul>
+        <div>關聯條目：<span class="wiki-link">[[02-zero-shot-few-shot]]</span><span class="wiki-link">[[05-hallucination-guardrails]]</span></div>
+      </section>
+
+      <section id="s04" class="card wiki-entry">
+        <div class="meta"><span class="badge">Wiki §04</span> 原始檔案：<code>wiki_sources/04-structured-output-roles.md</code></div>
+        <h3>角色設定（Role Prompting）與結構化輸出控制</h3>
+        <ul>
+          <li><strong>提示詞黃金四要素</strong>：<strong>角色（Role）</strong>＋<strong>任務（Task）</strong>＋<strong>背景受眾（Context）</strong>＋<strong>輸出格式（Format）</strong>。</li>
+          <li><strong>分隔符防干擾</strong>：善用 <code>###</code> 或 <code>"""</code> 區隔指令與原始文本，並指定 Markdown 表格或 JSON 輸出。</li>
+        </ul>
+        <div>關聯條目：<span class="wiki-link">[[01-llm-token-prediction]]</span></div>
+      </section>
+
+      <section id="s05" class="card wiki-entry">
+        <div class="meta"><span class="badge">Wiki §05</span> 原始檔案：<code>wiki_sources/05-hallucination-guardrails.md</code></div>
+        <h3>幻覺（Hallucination）抑制與邊界防呆設計</h3>
+        <ul>
+          <li><strong>幻覺成因</strong>：當缺乏事實依據時，模型為了完成文字接龍而編造看似合理的虛構內容。</li>
+          <li><strong>三大防呆護欄</strong>：明確允許 AI 回答「資料未提及」、強制要求標註 <code>[Wiki §編號]</code> 出處、限制僅能依據知識庫內容作答。</li>
+        </ul>
+        <div>關聯條目：<span class="wiki-link">[[03-chain-of-thought]]</span><span class="wiki-link">[[04-structured-output-roles]]</span></div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    LLM Wiki 知識庫（共 5 篇 Ingest 來源）｜本頁面資料已同步生成 <a href="index.html">教學型 HTML 簡報</a>
+  </footer>
+</body>
+</html>

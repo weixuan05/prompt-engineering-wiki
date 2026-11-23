@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教學簡報｜Prompt Engineering 提示詞工程入門</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --slide-bg: #ffffff;
+      --primary: #4f46e5;
+      --primary-soft: #eef2ff;
+      --accent: #0284c7;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --green: #059669;
+      --green-bg: #ecfdf5;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    /* Top Navbar */
+    .topbar {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid #1e293b;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #f8fafc;
+    }
+    .topbar-title {
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .wiki-btn {
+      background: #1e293b;
+      color: #93c5fd;
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border: 1px solid #334155;
+      transition: all 0.2s;
+    }
+    .wiki-btn:hover {
+      background: #334155;
+      color: #ffffff;
+    }
+    /* Progress Bar */
+    .progress-track {
+      width: 100%;
+      height: 4px;
+      background: #1e293b;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #38bdf8);
+      width: 12.5%;
+      transition: width 0.3s ease;
+    }
+    /* Slide Stage */
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+    .slide {
+      display: none;
+      background: var(--slide-bg);
+      width: 100%;
+      max-width: 1040px;
+      min-height: 560px;
+      border-radius: 18px;
+      padding: 2.75rem 3.25rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      flex-direction: column;
+      justify-content: space-between;
+      animation: fadeIn 0.3s ease;
+    }
+    .slide.active { display: flex; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Cover Slide */
+    .slide-cover {
+      background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 55%, #0284c7 100%);
+      color: #ffffff;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
+    .cover-pill {
+      background: rgba(255, 255, 255, 0.16);
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      letter-spacing: 0.04em;
+    }
+    .slide-cover h1 {
+      font-size: 2.65rem;
+      line-height: 1.25;
+      margin-bottom: 1rem;
+    }
+    .slide-cover p {
+      font-size: 1.2rem;
+      color: #e0e7ff;
+      max-width: 680px;
+      margin-bottom: 2rem;
+    }
+    /* Standard Slide Header */
+    .slide-header {
+      border-bottom: 2px solid var(--primary-soft);
+      padding-bottom: 0.85rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .slide-header h2 {
+      font-size: 1.75rem;
+      color: #1e1b4b;
+    }
+    .wiki-tag {
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.25rem 0.7rem;
+      border-radius: 6px;
+    }
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.15rem;
+      font-size: 1.08rem;
+      line-height: 1.65;
+    }
+    /* Layout Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 768px) {
+      .grid-2, .grid-4 { grid-template-columns: 1fr; }
+      .slide { padding: 1.75rem; min-height: auto; }
+      .slide-cover h1 { font-size: 1.9rem; }
+    }
+    .box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .box-bad {
+      background: var(--red-bg);
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .box-good {
+      background: var(--green-bg);
+      border: 1px solid #a7f3d0;
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .box h3, .box-bad h3, .box-good h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    .box-bad h3 { color: var(--red); }
+    .box-good h3 { color: var(--green); }
+    .analogy-banner {
+      background: #eff6ff;
+      border-left: 5px solid var(--accent);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      color: #0c4a6e;
+      font-weight: 500;
+    }
+    .code-sample {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+    /* Interactive Quiz */
+    .quiz-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      margin-top: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.98rem;
+      transition: all 0.2s;
+    }
+    .quiz-btn:hover { background: var(--primary-soft); border-color: var(--primary); }
+    .quiz-feedback {
+      margin-top: 0.75rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    /* Slide Footer */
+    .slide-footer {
+      margin-top: 1.25rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    /* Bottom Controls */
+    .controls {
+      background: #0f172a;
+      border-top: 1px solid #1e293b;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      color: #cbd5e1;
+    }
+    .nav-btn {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nav-btn:hover:not(:disabled) { background: var(--primary); border-color: var(--primary); }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .counter { font-weight: 700; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-title">🎓 教學簡報｜Prompt Engineering 提示詞工程入門</div>
+    <a href="wiki.html" class="wiki-btn">📚 查看原始 LLM Wiki 知識庫</a>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
+
+  <div class="stage">
+    <!-- Slide 1: Cover -->
+    <section class="slide slide-cover active">
+      <div class="cover-pill">知識來源：Prompt Engineering LLM Wiki（5 篇核心文獻整合）</div>
+      <h1>Prompt Engineering<br>提示詞工程完全入門</h1>
+      <p>給初學者的第一堂 AI 溝通課：學會精準提問、激發邏輯推理，讓大型語言模型從「聊天機器人」變身「超級專業助理」。</p>
+      <div style="font-size: 0.92rem; color: #bae6fd;">💡 操作提示：點擊下方按鈕或使用鍵盤左右方向鍵（← / →）切換投影片</div>
+    </section>
+
+    <!-- Slide 2: Why Learn Prompt Engineering -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>1. 為什麼 AI 總是回答「正確的廢話」？</h2>
+        <span class="wiki-tag">📚 對應來源：LLM Wiki §01</span>
+      </div>
+      <div class="slide-body">
+        <div class="analogy-banner">
+          💡 <strong>白話比喻</strong>：AI 就像一位剛報到、博學多聞但完全不認識你的「超級實習生」。你只說「幫我寫報告」，他只能猜一個最普通的模板交差。
+        </div>
+        <div class="grid-2">
+          <div class="box-bad">
+            <h3>❌ 模糊的提問（低品質輸出）</h3>
+            <p>「幫我介紹一下健康飲食。」</p>
+            <p style="margin-top:0.5rem; font-size:0.92rem; color:#7f1d1d;">→ AI 只能給出教科書式的籠統建議（多喝水、多吃蔬菜），缺乏實用價值。</p>
+          </div>
+          <div class="box-good">
+            <h3>✅ 精準的提問（高品質輸出）</h3>
+            <p>「你是營養師，請為外食族設計一份預算 250 元內、高蛋白減脂的一日三餐超商菜單，並用表格呈現。」</p>
+            <p style="margin-top:0.5rem; font-size:0.92rem; color:#065f46;">→ 鎖定角色、受眾、預算與格式，立刻產出可執行的方案！</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer"><span>Prompt Engineering 教學簡報</span><span>第 2 頁 / 共 8 頁</span></div>
+    </section>
+
+    <!-- Slide 3: How LLM Works -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>2. 底層原理：AI 不是讀心術，而是「機率接龍」</h2>
+        <span class="wiki-tag">📚 對應來源：LLM Wiki §01</span>
+      </div>
+      <div class="slide-body">
+        <p>大型語言模型（LLM）的核心運作方式稱為 <strong>Next-Token Prediction（下一個字詞預測）</strong>：</p>
+        <div class="code-sample">
+          輸入語境：「今天天氣真好，我們一起去公園……」<br>
+          AI 內部計算機率：<span style="color:#38bdf8;">散步 (45%)</span> ｜ <span style="color:#a5b4fc;">野餐 (30%)</span> ｜ <span style="color:#94a3b8;">寫程式 (0.1%)</span>
+        </div>
+        <div class="box">
+          <h3>🎯 給初學者的核心啟發</h3>
+          <p>你輸入的每一個背景線索（Context），都在幫 AI <strong>縮小猜測範圍</strong>。提示詞工程的本質，就是透過設計高品質的輸入語境，引導模型把最高機率分配給最專業的答案。</p>
+        </div>
+      </div>
+      <div class="slide-footer"><span>Prompt Engineering 教學簡報</span><span>第 3 頁 / 共 8 頁</span></div>
+    </section>
+
+    <!-- Slide 4: Golden Formula -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>3. 萬用起手式：提示詞「黃金四要素」</h2>
+        <span class="wiki-tag">📚 對應來源：LLM Wiki §04</span>
+      </div>
+      <div class="slide-body">
+        <p>不知道怎麼寫提示詞時，只要套用這四個積木就能解決 80% 的日常任務：</p>
+        <div class="grid-4">
+          <div class="box">
+            <h3 style="color:#4f46e5;">① 角色 Role</h3>
+            <p style="font-size:0.95rem;">設定 AI 的專業身分。<br><em>例：你是資深高中英文老師</em></p>
+          </div>
+          <div class="box">
+            <h3 style="color:#0284c7;">② 任務 Task</h3>
+            <p style="font-size:0.95rem;">用明確動詞說明目標。<br><em>例：請批改並潤飾這篇作文</em></p>
+          </div>
+          <div class="box">
+            <h3 style="color:#059669;">③ 背景 Context</h3>
+            <p style="font-size:0.95rem;">說明限制與閱讀對象。<br><em>例：對象為高一學生，語氣鼓勵</em></p>
+          </div>
+          <div class="box">
+            <h3 style="color:#d97706;">④ 格式 Format</h3>
+            <p style="font-size:0.95rem;">指定最終呈現方式。<br><em>例：用 Markdown 表格列出修改前後</em></p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer"><span>Prompt Engineering 教學簡報</span><span>第 4 頁 / 共 8 頁</span></div>
+    </section>
+
+    <!-- Slide 5: Zero-Shot vs Few-Shot -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>4. 進階技巧 A：給範例比講道理更有用（Few-Shot）</h2>
+        <span class="wiki-tag">📚 對應來源：LLM Wiki §02</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="box">
+            <h3>Zero-Shot（零樣本提示）</h3>
+            <p><strong>做法</strong>：不給任何範例，直接要求 AI 執行。</p>
+            <p style="margin-top:0.5rem;"><strong>適用情境</strong>：翻譯、簡單摘要等常識性任務。但遇到特殊格式時，AI 容易自由發揮導致格式不統一。</p>
+          </div>
+          <div class="box-good">
+            <h3>Few-Shot（少樣本提示）⭐推薦</h3>
+            <p><strong>做法</strong>：先給 2～3 組「輸入 → 輸出」標準範例，再問真正問題。</p>
+            <div class="code-sample" style="margin-top:0.6rem; font-size:0.85rem;">
+              評論：「出貨很快」 → 標籤：【物流正面】<br>
+              評論：「螢幕有刮痕」 → 標籤：【品質負面】<br>
+              評論：「客服態度超棒」 → 標籤：<strong>（AI 自動接出【服務正面】）</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer"><span>Prompt Engineering 教學簡報</span><span>第 5 頁 / 共 8 頁</span></div>
+    </section>
+
+    <!-- Slide 6: Chain of Thought -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>5. 進階技巧 B：思維鏈（CoT）讓 AI 學會「慢慢想」</h2>
+        <span class="wiki-tag">📚 對應來源：LLM Wiki §03</span>
+      </div>
+      <div class="slide-body">
+        <div class="analogy-banner">
+          📝 <strong>白話比喻</strong>：就像考數學時發給 AI 一張「計算草稿紙」。要求 AI 直接心算寫答案容易出錯；讓它把算式寫出來，準確率會大幅飆升！
+        </div>
+        <div class="grid-2">
+          <div class="box-bad">
+            <h3>❌ 直接要答案（容易邏輯跳躍）</h3>
+            <p>「小明有 5 顆蘋果，吃掉 2 顆又買了 3 盒（每盒 4 顆），現在有幾顆？<strong>請直接回答數字。</strong>」</p>
+          </div>
+          <div class="box-good">
+            <h3>✅ 啟動思維鏈（Chain-of-Thought）</h3>
+            <p>在句尾加上魔法咒語：<strong>「請一步一步列出計算過程，最後再給出總數。」</strong><br>寫出來的中間步驟會成為後續預測依據，有效消除計算失誤。</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer"><span>Prompt Engineering 教學簡報</span><span>第 6 頁 / 共 8 頁</span></div>
+    </section>
+
+    <!-- Slide 7: Guardrails against Hallucination -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>6. 可靠性防呆：阻止 AI「一本正經胡說八道」</h2>
+        <span class="wiki-tag">📚 對應來源：LLM Wiki §05</span>
+      </div>
+      <div class="slide-body">
+        <p>當問題超出知識範圍時，AI 為了完成接龍任務會產生<strong>「幻覺（Hallucination）」</strong>。請在提示詞加入三大防呆護欄：</p>
+        <div class="box">
+          <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <li><strong>🛡️ 護欄一（允許說不知道）</strong>：明確指示「若提供的參考資料中找不到答案，請直接回答『資料未提及』，嚴禁自行猜測」。</li>
+            <li><strong>📌 護欄二（強制標註出處）</strong>：要求 AI 在每個結論後方附上來源編號（例如：<code>[Wiki §05]</code>），方便人類快速核對。</li>
+            <li><strong>📚 護欄三（結合外部知識庫 / Wiki）</strong>：先建立經過驗證的 LLM Wiki，限制 AI 只能根據 Wiki 內容進行教學改寫。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="slide-footer"><span>Prompt Engineering 教學簡報</span><span>第 7 頁 / 共 8 頁</span></div>
+    </section>
+
+    <!-- Slide 8: Summary & Interactive Quiz -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>7. 課程總結與隨堂小測驗</h2>
+        <span class="wiki-tag">📚 綜合複習：Wiki §01 ~ §05</span>
+      </div>
+      <div class="slide-body">
+        <div class="box">
+          <h3>🧪 隨堂測試：你想讓 AI 幫你計算複雜的旅遊預算拆帳，哪種問法最不容易算錯？</h3>
+          <button class="quiz-btn" onclick="checkQuiz(false)">A. 「幫我算這筆帳，請直接給我最後每個人要付多少錢的數字就好。」</button>
+          <button class="quiz-btn" onclick="checkQuiz(true)">B. 「請一步一步列出每個人的分攤明細與加減過程，最後再統整總金額。」（思維鏈 CoT）</button>
+          <div id="quizResult" class="quiz-feedback"></div>
+        </div>
+        <div style="text-align: center; margin-top: 0.5rem;">
+          <a href="wiki.html" style="color: #4f46e5; font-weight: 700; text-decoration: none;">👉 點此返回瀏覽完整 LLM Wiki 知識庫與 5 篇原始文獻</a>
+        </div>
+      </div>
+      <div class="slide-footer"><span>Prompt Engineering 教學簡報（完）</span><span>第 8 頁 / 共 8 頁</span></div>
+    </section>
+  </div>
+
+  <div class="controls">
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← 上一頁</button>
+    <span class="counter" id="slideCounter">1 / 8</span>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">下一頁 →</button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('slideCounter');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    let current = 0;
+
+    function updateSlide() {
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+      counter.textContent = `${current + 1} / ${slides.length}`;
+      progressBar.style.width = `${((current + 1) / slides.length) * 100}%`;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === slides.length - 1;
+    }
+
+    function changeSlide(step) {
+      const next = current + step;
+      if (next >= 0 && next < slides.length) {
+        current = next;
+        updateSlide();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+      if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function checkQuiz(isCorrect) {
+      const res = document.getElementById('quizResult');
+      if (isCorrect) {
+        res.style.color = '#059669';
+        res.textContent = '✅ 答對了！這正是 Wiki §03 介紹的「思維鏈（Chain-of-Thought）」，先寫出推理草稿能大幅降低算術錯誤！';
+      } else {
+        res.style.color = '#dc2626';
+        res.textContent = '❌ 再想一下！直接要最終數字會讓 AI 沒有草稿紙空間心算，容易算錯喔（請參考 Wiki §03）。';
+      }
+    }
+
+    updateSlide();
+  </script>
+</body>
+</html>
